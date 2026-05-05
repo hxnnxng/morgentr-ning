@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f1117">
+  <title>Morgenrutine: SI-Løsneren & Core-Vækkeren</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --accent: #4f8cff;
+      --accent-glow: rgba(79, 140, 255, 0.25);
+      --green: #34d399;
+      --orange: #fb923c;
+      --red: #f87171;
+      --text: #e4e4e7;
+      --muted: #71717a;
+      --border: #27272a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      -webkit-text-size-adjust: 100%;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      max-width: 800px;
+      padding: 0 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .progress-steps {
+      display: flex;
+      gap: 4px;
+    }
+
+    .progress-step {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .progress-step.done { background: var(--green); }
+    .progress-step.active { background: var(--accent); animation: pulse-bar 1s infinite; }
+
+    @keyframes pulse-bar {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Section label */
+    .section-label {
+      width: 100%;
+      max-width: 800px;
+      padding: 0 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-label span {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Main card */
+    .exercise-card {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin: 0 1rem;
+      overflow: hidden;
+    }
+
+    #workoutScreen {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      background: #000;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .exercise-info {
+      padding: 1.25rem 1.5rem;
+    }
+
+    .exercise-number {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .exercise-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0.25rem 0 0.75rem;
+    }
+
+    .exercise-detail {
+      margin-bottom: 0.5rem;
+    }
+
+    .exercise-detail strong {
+      color: var(--accent);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .exercise-detail p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-top: 0.15rem;
+    }
+
+    .exercise-tip {
+      background: rgba(251, 146, 60, 0.1);
+      border-left: 3px solid var(--orange);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0 8px 8px 0;
+      margin-top: 0.75rem;
+    }
+
+    .exercise-tip p {
+      color: var(--orange);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    /* Timer section */
+    .timer-section {
+      width: 100%;
+      max-width: 800px;
+      padding: 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .timer-display {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .timer-circle {
+      width: 120px;
+      height: 120px;
+      transform: rotate(-90deg);
+    }
+
+    .timer-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 4;
+    }
+
+    .timer-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s linear, stroke 0.3s;
+    }
+
+    .timer-progress.warning { stroke: var(--orange); }
+    .timer-progress.danger { stroke: var(--red); }
+    .timer-progress.rest { stroke: var(--green); }
+
+    .timer-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .timer-seconds {
+      font-size: 2rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .timer-label.rest-label { color: var(--green); }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .btn:active { transform: scale(0.96); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover { background: #3b7bef; }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.25rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-secondary:hover { background: #333; }
+
+    .btn-icon {
+      background: var(--border);
+      color: var(--text);
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      border-radius: 50%;
+    }
+
+    .btn-icon:hover { background: #333; }
+
+    /* Start screen */
+    .start-screen {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .start-screen h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .start-screen p {
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .start-screen .btn-primary {
+      margin-top: 2rem;
+      padding: 1rem 3rem;
+      font-size: 1.1rem;
+      border-radius: 16px;
+    }
+
+    .exercise-list-preview {
+      text-align: left;
+      margin: 1.5rem auto;
+      max-width: 500px;
+    }
+
+    .exercise-list-preview h3 {
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .exercise-list-preview .part-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .exercise-list-preview li {
+      list-style: none;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .exercise-list-preview li span.time {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* Done screen */
+    .done-screen {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      padding: 4rem 1.5rem;
+    }
+
+    .done-screen h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--green);
+    }
+
+    .done-screen p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .done-screen .btn-primary {
+      margin-top: 2rem;
+      background: var(--green);
+    }
+
+    .done-screen .btn-primary:hover { background: #2bc48a; }
+
+    .hidden { display: none !important; }
+
+    /* Breathing reminder */
+    .breathing {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ===== MOBILE: up to 640px ===== */
+    @media (max-width: 640px) {
+      header {
+        padding: 1.25rem 1rem 0.5rem;
+      }
+
+      header h1 { font-size: 1.2rem; }
+      header p { font-size: 0.8rem; }
+
+      /* Start screen */
+      .start-screen {
+        padding: 2rem 1rem;
+      }
+
+      .start-screen h2 { font-size: 1.5rem; }
+
+      .start-screen .btn-primary {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+      }
+
+      .exercise-list-preview {
+        margin: 1rem auto;
+      }
+
+      /* Workout screen: card goes edge-to-edge */
+      .exercise-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin: 0;
+      }
+
+      .exercise-info {
+        padding: 0.75rem 1rem;
+      }
+
+      .exercise-name {
+        font-size: 1.15rem;
+        margin: 0.15rem 0 0.5rem;
+      }
+
+      .exercise-number { font-size: 0.7rem; }
+
+      .exercise-detail strong { font-size: 0.75rem; }
+      .exercise-detail p { font-size: 0.85rem; }
+
+      .section-label {
+        padding: 0 1rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .progress-container {
+        margin-bottom: 0.5rem;
+      }
+
+      /* Sticky timer bar at bottom on mobile */
+      .timer-section {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0));
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        z-index: 100;
+      }
+
+      .timer-display {
+        width: 64px;
+        height: 64px;
+        flex-shrink: 0;
+      }
+
+      .timer-circle {
+        width: 64px;
+        height: 64px;
+      }
+
+      .timer-seconds { font-size: 1.3rem; }
+      .timer-label { font-size: 0.55rem; }
+
+      .breathing { display: none; }
+
+      .controls {
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        padding: 0.65rem 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      .btn-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.1rem;
+      }
+
+      /* Extra bottom padding so content isn't hidden behind sticky bar */
+      #workoutScreen {
+        padding-bottom: 100px;
+      }
+
+      /* Done screen */
+      .done-screen {
+        padding: 3rem 1.5rem;
+      }
+
+      .done-screen h2 { font-size: 1.5rem; }
+
+      .done-screen .btn-primary {
+        width: 100%;
+        padding: 1rem;
+      }
+    }
+
+    /* ===== VERY SMALL: up to 360px ===== */
+    @media (max-width: 360px) {
+      header h1 { font-size: 1.05rem; }
+
+      .start-screen h2 { font-size: 1.3rem; }
+
+      .exercise-name { font-size: 1rem; }
+
+      .exercise-detail p { font-size: 0.8rem; }
+
+      .timer-display {
+        width: 56px;
+        height: 56px;
+      }
+
+      .timer-circle {
+        width: 56px;
+        height: 56px;
+      }
+
+      .timer-seconds { font-size: 1.1rem; }
+
+      .btn-primary {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+      }
+
+      .btn-icon {
+        width: 42px;
+        height: 42px;
+      }
+    }
+
+    /* ===== LANDSCAPE MOBILE ===== */
+    @media (max-height: 500px) and (orientation: landscape) {
+      header { padding: 0.5rem 1rem 0.25rem; }
+      header h1 { font-size: 1rem; }
+      header p { display: none; }
+
+      .video-container {
+        padding-bottom: 40%;
+      }
+
+      .exercise-info { padding: 0.5rem 1rem; }
+      .exercise-detail { margin-bottom: 0.25rem; }
+
+      .timer-section {
+        padding: 0.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>SI-Løsneren & Core-Vækkeren</h1>
+    <p>10-minutters morgenrutine</p>
+  </header>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="start-screen">
+    <h2>God morgen!</h2>
+    <p>Denne rutine løsner dit SI-led, vækker din core og fjerner morgenstivheden — uden at belaste din lyske.</p>
+    <p style="font-size:0.8rem;">10 øvelser &middot; 45 sek. pr. øvelse &middot; 15 sek. pause</p>
+
+    <div class="exercise-list-preview">
+      <p class="part-label">Del 1 — Mobilisering af SI-led og bækken</p>
+      <ul>
+        <li>Pelvic Tilts (Bækkenkip) <span class="time">45s</span></li>
+        <li>Knee-to-Chest (Asymmetrisk) <span class="time">45s</span></li>
+        <li>Glute Bridges (Bækkenløft) <span class="time">45s</span></li>
+        <li>90/90 Hip Switches <span class="time">45s</span></li>
+        <li>Cat-Cow <span class="time">45s</span></li>
+      </ul>
+      <p class="part-label">Del 2 — Core-stabilitet</p>
+      <ul>
+        <li>Bird-Dog <span class="time">45s</span></li>
+        <li>Dead Bug <span class="time">45s</span></li>
+        <li>Sideplanke på knæ <span class="time">45s</span></li>
+        <li>Ridderstræk <span class="time">45s</span></li>
+        <li>Barnets stilling <span class="time">45s</span></li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary" onclick="startWorkout()">Start træning</button>
+  </div>
+
+  <!-- WORKOUT SCREEN -->
+  <div id="workoutScreen" class="hidden">
+    <div class="progress-container">
+      <div class="progress-steps" id="progressSteps"></div>
+    </div>
+
+    <div class="section-label">
+      <span id="sectionLabel"></span>
+    </div>
+
+    <div class="exercise-card">
+      <div class="video-container">
+        <iframe id="videoPlayer" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      <div class="exercise-info">
+        <div class="exercise-number" id="exerciseNumber"></div>
+        <div class="exercise-name" id="exerciseName"></div>
+        <div class="exercise-detail">
+          <strong>Udførsel</strong>
+          <p id="exerciseHow"></p>
+        </div>
+        <div class="exercise-detail">
+          <strong>Hvorfor</strong>
+          <p id="exerciseWhy"></p>
+        </div>
+        <div class="exercise-tip hidden" id="exerciseTipBox">
+          <p id="exerciseTip"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="timer-section">
+      <div class="timer-display">
+        <svg class="timer-circle" viewBox="0 0 120 120">
+          <circle class="timer-bg" cx="60" cy="60" r="54" />
+          <circle class="timer-progress" id="timerProgress" cx="60" cy="60" r="54"
+            stroke-dasharray="339.29" stroke-dashoffset="0" />
+        </svg>
+        <div class="timer-text">
+          <div class="timer-seconds" id="timerSeconds">45</div>
+          <div class="timer-label" id="timerLabel">Øvelse</div>
+        </div>
+      </div>
+      <p class="breathing" id="breathingText">Træk vejret dybt ned i maven</p>
+
+      <div class="controls">
+        <button class="btn btn-icon" id="btnPrev" onclick="prevExercise()" title="Forrige">&#9664;</button>
+        <button class="btn btn-primary" id="btnPause" onclick="togglePause()">Pause</button>
+        <button class="btn btn-icon" id="btnSkip" onclick="skipExercise()" title="Spring over">&#9654;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="doneScreen" class="done-screen hidden">
+    <h2>Godt klaret!</h2>
+    <p>Du har gennemført din morgenrutine.</p>
+    <p style="font-size:0.85rem; margin-top:0.5rem;">Husk: Kontinuitet slår intensitet.<br>Gør dette hver dag i 14 dage og mærk forskellen.</p>
+    <button class="btn btn-primary" onclick="resetWorkout()">Start forfra</button>
+  </div>
+
+  <!-- AUDIO (beep) -->
+
+  <script>
+    const EXERCISE_TIME = 45;
+    const REST_TIME = 15;
+    const CIRCUMFERENCE = 2 * Math.PI * 54; // ~339.29
+
+    const exercises = [
+      {
+        name: 'Pelvic Tilts (Bækkenkip)',
+        section: 'Del 1: Mobilisering af SI-led og bækken',
+        videoId: 'pI5nJHT2hpA',
+        how: 'Lig på ryggen med bøjede ben. Pres lænden fladt mod gulvet (spænd i maven), og svaj derefter kontrolleret i lænden.',
+        why: 'Det løsner de små muskler omkring SI-leddet helt blidt.',
+        tip: null
+      },
+      {
+        name: 'Knee-to-Chest (Asymmetrisk)',
+        section: 'Del 1: Mobilisering af SI-led og bækken',
+        videoId: 'bUHjaXGDm_E',
+        how: 'Lig på ryggen. Træk det ene knæ op mod brystet og lidt ud mod samme sides skulder. Hold i 5 sekunder og skift ben.',
+        why: 'Skaber den asymmetriske bevægelse, som SI-leddet har brug for.',
+        tip: null
+      },
+      {
+        name: 'Glute Bridges (Bækkenløft)',
+        section: 'Del 1: Mobilisering af SI-led og bækken',
+        videoId: 'wPM8icPu6H8',
+        how: 'Løft bækkenet mod loftet. Spænd ballerne hårdt i toppen.',
+        why: 'Ballerne er SI-leddets vigtigste stabilisatorer.',
+        tip: 'Hold knæene pegende lige frem for ikke at irritere din lyske.'
+      },
+      {
+        name: '90/90 Hip Switches',
+        section: 'Del 1: Mobilisering af SI-led og bækken',
+        videoId: 'qq_Z7sAmVrA',
+        how: 'Sid på gulvet med benene i 90 graders vinkler. Lad knæene falde langsomt fra side til side.',
+        why: 'Den ultimative øvelse til at mobilisere både hofteled og SI-led.',
+        tip: null
+      },
+      {
+        name: 'Cat-Cow',
+        section: 'Del 1: Mobilisering af SI-led og bækken',
+        videoId: 'xyNwxiuERXc',
+        how: 'Stå på alle fire. Skyd ryg som en kat, og svaj derefter som en ko.',
+        why: 'Integrerer bevægelsen fra bækkenet op gennem hele rygsøjlen.',
+        tip: null
+      },
+      {
+        name: 'Bird-Dog',
+        section: 'Del 2: Core-stabilitet uden lyske-stress',
+        videoId: 'wGh2fZU20-M',
+        how: 'Stå på alle fire. Stræk modsat arm og ben samtidig. Hold ryggen helt ret.',
+        why: 'Styrker de krydsgående kæder, der holder SI-leddet på plads.',
+        tip: null
+      },
+      {
+        name: 'Dead Bug',
+        section: 'Del 2: Core-stabilitet uden lyske-stress',
+        videoId: 'g_BYB0R-4Ws',
+        how: 'Lig på ryggen med benene i 90 grader ("tabletop"). Sænk langsomt modsat arm/ben mod gulvet uden at lænden slipper underlaget.',
+        why: 'Træner dyb core-stabilitet uden det aggressive vrid i lysken.',
+        tip: null
+      },
+      {
+        name: 'Sideplanke på knæ',
+        section: 'Del 2: Core-stabilitet uden lyske-stress',
+        videoId: 'ribtncUfriU',
+        how: 'Løft hoften fra gulvet, mens du støtter på underarm og knæ (ikke fødder).',
+        why: 'Styrker de skrå mavemuskler og hoftestabilisatorerne (Glute Medius) uden at belaste adduktorerne for hårdt.',
+        tip: null
+      },
+      {
+        name: 'Ridderstræk (Hip Flexor Stretch)',
+        section: 'Del 2: Core-stabilitet uden lyske-stress',
+        videoId: 'K5EZ8ztNEcw',
+        how: 'Ét knæ i jorden, kip bækkenet ind under dig selv. Mærk strækket på forsiden af hoften.',
+        why: 'Løsner stramme hoftefleksorer, som trækker i bækkenet og SI-leddet.',
+        tip: 'Gør det meget forsigtigt pga. din adductor-smerte.'
+      },
+      {
+        name: 'Barnets stilling (Child\'s Pose)',
+        section: 'Del 2: Core-stabilitet uden lyske-stress',
+        videoId: 'eqVMAPM00DM',
+        how: 'Sid på hælene og læn dig frem. Slap helt af i lænden.',
+        why: 'Giver ro på nervesystemet og afslutter morgenstivheden.',
+        tip: null
+      }
+    ];
+
+    let currentExercise = 0;
+    let timeLeft = EXERCISE_TIME;
+    let isResting = false;
+    let isPaused = false;
+    let timerInterval = null;
+
+    // Audio context for beeps
+    function playBeep(freq = 660, duration = 150) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        gain.gain.value = 0.3;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration / 1000);
+        osc.stop(ctx.currentTime + duration / 1000);
+      } catch (e) {}
+    }
+
+    function playDoubleBeep() {
+      playBeep(880, 120);
+      setTimeout(() => playBeep(880, 120), 180);
+    }
+
+    function buildProgress() {
+      const container = document.getElementById('progressSteps');
+      container.innerHTML = '';
+      for (let i = 0; i < exercises.length; i++) {
+        const step = document.createElement('div');
+        step.className = 'progress-step';
+        if (i < currentExercise) step.classList.add('done');
+        if (i === currentExercise) step.classList.add('active');
+        container.appendChild(step);
+      }
+    }
+
+    function showExercise() {
+      const ex = exercises[currentExercise];
+      document.getElementById('sectionLabel').textContent = ex.section;
+      document.getElementById('exerciseNumber').textContent = `Øvelse ${currentExercise + 1} af ${exercises.length}`;
+      document.getElementById('exerciseName').textContent = ex.name;
+      document.getElementById('exerciseHow').textContent = ex.how;
+      document.getElementById('exerciseWhy').textContent = ex.why;
+
+      const tipBox = document.getElementById('exerciseTipBox');
+      if (ex.tip) {
+        tipBox.classList.remove('hidden');
+        document.getElementById('exerciseTip').textContent = ex.tip;
+      } else {
+        tipBox.classList.add('hidden');
+      }
+
+      document.getElementById('videoPlayer').src =
+        `https://www.youtube.com/embed/${ex.videoId}?rel=0&modestbranding=1`;
+
+      buildProgress();
+    }
+
+    function updateTimerDisplay() {
+      const total = isResting ? REST_TIME : EXERCISE_TIME;
+      const fraction = timeLeft / total;
+      const offset = CIRCUMFERENCE * (1 - fraction);
+
+      const progress = document.getElementById('timerProgress');
+      progress.style.strokeDashoffset = offset;
+
+      progress.classList.remove('warning', 'danger', 'rest');
+      if (isResting) {
+        progress.classList.add('rest');
+      } else if (timeLeft <= 5) {
+        progress.classList.add('danger');
+      } else if (timeLeft <= 10) {
+        progress.classList.add('warning');
+      }
+
+      document.getElementById('timerSeconds').textContent = timeLeft;
+      const label = document.getElementById('timerLabel');
+      label.textContent = isResting ? 'Pause' : 'Øvelse';
+      label.className = 'timer-label' + (isResting ? ' rest-label' : '');
+
+      document.getElementById('breathingText').textContent =
+        isResting ? 'Gør dig klar til næste øvelse...' : 'Træk vejret dybt ned i maven';
+    }
+
+    function tick() {
+      if (isPaused) return;
+
+      timeLeft--;
+
+      if (timeLeft <= 3 && timeLeft > 0) playBeep(440, 80);
+
+      if (timeLeft <= 0) {
+        playDoubleBeep();
+
+        if (isResting) {
+          // Rest done, move to next exercise
+          isResting = false;
+          currentExercise++;
+          if (currentExercise >= exercises.length) {
+            finishWorkout();
+            return;
+          }
+          timeLeft = EXERCISE_TIME;
+          showExercise();
+        } else {
+          // Exercise done, start rest (unless last exercise)
+          if (currentExercise >= exercises.length - 1) {
+            finishWorkout();
+            return;
+          }
+          isResting = true;
+          timeLeft = REST_TIME;
+        }
+      }
+
+      updateTimerDisplay();
+    }
+
+    function startWorkout() {
+      document.getElementById('startScreen').classList.add('hidden');
+      document.getElementById('workoutScreen').classList.remove('hidden');
+      document.getElementById('doneScreen').classList.add('hidden');
+
+      currentExercise = 0;
+      timeLeft = EXERCISE_TIME;
+      isResting = false;
+      isPaused = false;
+
+      showExercise();
+      updateTimerDisplay();
+      document.getElementById('btnPause').textContent = 'Pause';
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      document.getElementById('btnPause').textContent = isPaused ? 'Fortsæt' : 'Pause';
+    }
+
+    function skipExercise() {
+      if (isResting) {
+        isResting = false;
+        currentExercise++;
+        if (currentExercise >= exercises.length) {
+          finishWorkout();
+          return;
+        }
+      } else {
+        if (currentExercise >= exercises.length - 1) {
+          finishWorkout();
+          return;
+        }
+        isResting = true;
+      }
+
+      if (isResting) {
+        timeLeft = REST_TIME;
+      } else {
+        timeLeft = EXERCISE_TIME;
+        showExercise();
+      }
+      updateTimerDisplay();
+    }
+
+    function prevExercise() {
+      if (currentExercise > 0) {
+        currentExercise--;
+        isResting = false;
+        timeLeft = EXERCISE_TIME;
+        showExercise();
+        updateTimerDisplay();
+      }
+    }
+
+    function finishWorkout() {
+      clearInterval(timerInterval);
+      document.getElementById('workoutScreen').classList.add('hidden');
+      document.getElementById('doneScreen').classList.remove('hidden');
+    }
+
+    function resetWorkout() {
+      document.getElementById('doneScreen').classList.add('hidden');
+      document.getElementById('startScreen').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

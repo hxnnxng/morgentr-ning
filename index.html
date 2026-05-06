@@ -230,6 +230,28 @@
       margin-top: 0.75rem;
     }
 
+    .exercise-side {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(79, 140, 255, 0.12);
+      border: 1px solid rgba(79, 140, 255, 0.3);
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      margin-top: 0.5rem;
+      animation: side-fade 0.3s ease-out;
+    }
+
+    .exercise-side .side-arrow { font-size: 0.9rem; }
+
+    @keyframes side-fade {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* Instructions block */
     .exercise-info-block {
       width: 100%;
@@ -634,7 +656,7 @@
       <p class="part-label">Del 1 — Mobilisering af SI-led og bækken</p>
       <ul>
         <li>Pelvic Tilts (Bækkenkip) <span class="time">45s</span></li>
-        <li>Knee-to-Chest (Asymmetrisk) <span class="time">45s</span></li>
+        <li>Knee-to-Chest (Asymmetrisk) <span class="time">2 × 30s</span></li>
         <li>Glute Bridges (Bækkenløft) <span class="time">45s</span></li>
         <li>90/90 Hip Switches <span class="time">45s</span></li>
         <li>Cat-Cow <span class="time">45s</span></li>
@@ -643,8 +665,8 @@
       <ul>
         <li>Bird-Dog <span class="time">45s</span></li>
         <li>Dead Bug <span class="time">45s</span></li>
-        <li>Sideplanke på knæ <span class="time">45s</span></li>
-        <li>Ridderstræk <span class="time">45s</span></li>
+        <li>Sideplanke på knæ <span class="time">2 × 30s</span></li>
+        <li>Ridderstræk <span class="time">2 × 30s</span></li>
         <li>Barnets stilling <span class="time">45s</span></li>
       </ul>
     </div>
@@ -679,6 +701,9 @@
       <span id="exerciseName"></span>
     </a>
     <div class="video-hint">Tryk for at se video på YouTube</div>
+    <div id="exerciseSide" class="exercise-side hidden">
+      <span class="side-arrow">↳</span><span id="exerciseSideText"></span>
+    </div>
     <div class="exercise-number" id="exerciseNumber"></div>
 
     <div class="exercise-info-block">
@@ -751,6 +776,7 @@
 
   <script>
     const EXERCISE_TIME = 45;
+    const SIDE_TIME = 30;
     const REST_TIME = 15;
     const CIRCUMFERENCE = 2 * Math.PI * 92; // ~578.05
 
@@ -767,7 +793,8 @@
         name: 'Knee-to-Chest (Asymmetrisk)',
         section: 'Del 1: Mobilisering af SI-led og bækken',
         videoId: 'bUHjaXGDm_E',
-        how: 'Lig på ryggen. Træk det ene knæ op mod brystet og lidt ud mod samme sides skulder. Hold i 5 sekunder og skift ben.',
+        sides: ['Venstre side', 'Højre side'],
+        how: 'Lig på ryggen. Træk det ene knæ op mod brystet og lidt ud mod samme sides skulder. Hold strækket i 30 sekunder pr. side.',
         why: 'Skaber den asymmetriske bevægelse, som SI-leddet har brug for.',
         tip: null
       },
@@ -815,7 +842,8 @@
         name: 'Sideplanke på knæ',
         section: 'Del 2: Core-stabilitet uden lyske-stress',
         videoId: 'ribtncUfriU',
-        how: 'Løft hoften fra gulvet, mens du støtter på underarm og knæ (ikke fødder).',
+        sides: ['Venstre side', 'Højre side'],
+        how: 'Løft hoften fra gulvet, mens du støtter på underarm og knæ (ikke fødder). 30 sekunder pr. side.',
         why: 'Styrker de skrå mavemuskler og hoftestabilisatorerne (Glute Medius) uden at belaste adduktorerne for hårdt.',
         tip: null
       },
@@ -823,7 +851,8 @@
         name: 'Ridderstræk (Hip Flexor Stretch)',
         section: 'Del 2: Core-stabilitet uden lyske-stress',
         videoId: 'K5EZ8ztNEcw',
-        how: 'Ét knæ i jorden, kip bækkenet ind under dig selv. Mærk strækket på forsiden af hoften.',
+        sides: ['Venstre side', 'Højre side'],
+        how: 'Ét knæ i jorden, kip bækkenet ind under dig selv. Mærk strækket på forsiden af hoften. 30 sekunder pr. side.',
         why: 'Løsner stramme hoftefleksorer, som trækker i bækkenet og SI-leddet.',
         tip: 'Gør det meget forsigtigt pga. din adductor-smerte.'
       },
@@ -838,11 +867,77 @@
     ];
 
     let currentExercise = 0;
+    let currentSide = 0;
     let timeLeft = EXERCISE_TIME;
     let isResting = false;
     let isPaused = false;
     let timerInterval = null;
+    let workoutStartedAt = null;
     let workoutCompletedAt = null;
+    let totalPausedMs = 0;
+    let pauseStartedAt = null;
+    let completedLog = []; // [{name, durationSeconds}]
+
+    function getCurrentDuration() {
+      const ex = exercises[currentExercise];
+      return ex && ex.sides ? SIDE_TIME : EXERCISE_TIME;
+    }
+
+    function getElapsedSeconds() {
+      if (!workoutStartedAt) return 0;
+      const end = workoutCompletedAt ? workoutCompletedAt.getTime() : Date.now();
+      let pausedTotal = totalPausedMs;
+      if (isPaused && pauseStartedAt) {
+        pausedTotal += Date.now() - pauseStartedAt;
+      }
+      return Math.max(1, Math.round((end - workoutStartedAt.getTime() - pausedTotal) / 1000));
+    }
+
+    function formatDuration(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    function logCompletedSegment() {
+      const ex = exercises[currentExercise];
+      if (!ex) return;
+      if (ex.sides) {
+        const sideLabel = ex.sides[currentSide].toLowerCase();
+        completedLog.push({ name: `${ex.name} – ${sideLabel}`, durationSeconds: SIDE_TIME });
+      } else {
+        completedLog.push({ name: ex.name, durationSeconds: EXERCISE_TIME });
+      }
+    }
+
+    function buildStravaDescription() {
+      const lines = ['Morgenrutine — SI-Løsneren & Core-Vækkeren', ''];
+      lines.push('Øvelser:');
+      // Group asymmetric sides under one entry
+      const grouped = [];
+      for (const item of completedLog) {
+        const baseName = item.name.includes(' – ') ? item.name.split(' – ')[0] : item.name;
+        const last = grouped[grouped.length - 1];
+        if (last && last.baseName === baseName && item.name.includes(' – ')) {
+          last.duration += item.durationSeconds;
+          last.sideCount = (last.sideCount || 1) + 1;
+        } else {
+          grouped.push({
+            baseName,
+            duration: item.durationSeconds,
+            sideCount: item.name.includes(' – ') ? 1 : 0
+          });
+        }
+      }
+      grouped.forEach((g, i) => {
+        const time = `${g.duration}s`;
+        const suffix = g.sideCount > 0 ? ` (${g.sideCount} × ${SIDE_TIME}s)` : '';
+        lines.push(`${i + 1}. ${g.baseName}: ${time}${suffix}`);
+      });
+      lines.push('');
+      lines.push(`Samlet varighed: ${formatDuration(getElapsedSeconds())} (inkl. pauser)`);
+      return lines.join('\n');
+    }
 
     /* ============ AUDIO ============ */
     let audioCtx = null;
@@ -895,6 +990,18 @@
       document.getElementById('exerciseHow').textContent = ex.how;
       document.getElementById('exerciseWhy').textContent = ex.why;
 
+      const sideBox = document.getElementById('exerciseSide');
+      if (ex.sides) {
+        sideBox.classList.remove('hidden');
+        document.getElementById('exerciseSideText').textContent = ex.sides[currentSide];
+        // Re-trigger animation
+        sideBox.style.animation = 'none';
+        sideBox.offsetHeight;
+        sideBox.style.animation = '';
+      } else {
+        sideBox.classList.add('hidden');
+      }
+
       const tipBox = document.getElementById('exerciseTipBox');
       if (ex.tip) {
         tipBox.classList.remove('hidden');
@@ -907,7 +1014,7 @@
     }
 
     function updateTimerDisplay() {
-      const total = isResting ? REST_TIME : EXERCISE_TIME;
+      const total = isResting ? REST_TIME : getCurrentDuration();
       const fraction = timeLeft / total;
       const offset = CIRCUMFERENCE * (1 - fraction);
 
@@ -946,19 +1053,32 @@
         if (isResting) {
           isResting = false;
           currentExercise++;
+          currentSide = 0;
           if (currentExercise >= exercises.length) {
             finishWorkout();
             return;
           }
-          timeLeft = EXERCISE_TIME;
+          timeLeft = getCurrentDuration();
           showExercise();
         } else {
-          if (currentExercise >= exercises.length - 1) {
-            finishWorkout();
-            return;
+          // Just finished an exercise (or one side of asymmetric)
+          logCompletedSegment();
+
+          const ex = exercises[currentExercise];
+          if (ex.sides && currentSide < ex.sides.length - 1) {
+            // More sides to do — switch immediately, no rest
+            currentSide++;
+            timeLeft = getCurrentDuration();
+            showExercise();
+          } else {
+            // Exercise fully complete
+            if (currentExercise >= exercises.length - 1) {
+              finishWorkout();
+              return;
+            }
+            isResting = true;
+            timeLeft = REST_TIME;
           }
-          isResting = true;
-          timeLeft = REST_TIME;
         }
       }
 
@@ -975,9 +1095,15 @@
       document.getElementById('doneScreen').classList.add('hidden');
 
       currentExercise = 0;
-      timeLeft = EXERCISE_TIME;
+      currentSide = 0;
+      timeLeft = getCurrentDuration();
       isResting = false;
       isPaused = false;
+      workoutStartedAt = new Date();
+      workoutCompletedAt = null;
+      totalPausedMs = 0;
+      pauseStartedAt = null;
+      completedLog = [];
 
       showExercise();
       updateTimerDisplay();
@@ -987,40 +1113,77 @@
 
     function togglePause() {
       isPaused = !isPaused;
+      if (isPaused) {
+        pauseStartedAt = Date.now();
+      } else if (pauseStartedAt) {
+        totalPausedMs += Date.now() - pauseStartedAt;
+        pauseStartedAt = null;
+      }
       document.getElementById('btnPause').textContent = isPaused ? 'Fortsæt' : 'Pause';
     }
 
     function skipExercise() {
       if (isResting) {
+        // Skip the rest -> next exercise
         isResting = false;
         currentExercise++;
+        currentSide = 0;
         if (currentExercise >= exercises.length) { finishWorkout(); return; }
-      } else {
-        if (currentExercise >= exercises.length - 1) { finishWorkout(); return; }
-        isResting = true;
-      }
-
-      if (isResting) {
-        timeLeft = REST_TIME;
-      } else {
-        timeLeft = EXERCISE_TIME;
+        timeLeft = getCurrentDuration();
         showExercise();
+      } else {
+        // Skip current segment (side or whole exercise)
+        logCompletedSegment();
+        const ex = exercises[currentExercise];
+        if (ex.sides && currentSide < ex.sides.length - 1) {
+          currentSide++;
+          timeLeft = getCurrentDuration();
+          showExercise();
+        } else {
+          if (currentExercise >= exercises.length - 1) { finishWorkout(); return; }
+          isResting = true;
+          timeLeft = REST_TIME;
+        }
       }
       updateTimerDisplay();
     }
 
     function prevExercise() {
-      if (currentExercise > 0) {
-        currentExercise--;
+      if (isResting) {
+        // Go back to current exercise (last side if asymmetric)
         isResting = false;
-        timeLeft = EXERCISE_TIME;
+        const ex = exercises[currentExercise];
+        currentSide = ex.sides ? ex.sides.length - 1 : 0;
+        timeLeft = getCurrentDuration();
         showExercise();
-        updateTimerDisplay();
+        // Pop the last segment we just logged
+        if (completedLog.length > 0) completedLog.pop();
+      } else if (currentSide > 0) {
+        // Go back one side within asymmetric exercise
+        currentSide--;
+        timeLeft = getCurrentDuration();
+        showExercise();
+        if (completedLog.length > 0) completedLog.pop();
+      } else if (currentExercise > 0) {
+        // Go back to previous exercise (last side if asymmetric)
+        currentExercise--;
+        const prev = exercises[currentExercise];
+        currentSide = prev.sides ? prev.sides.length - 1 : 0;
+        timeLeft = getCurrentDuration();
+        showExercise();
+        if (completedLog.length > 0) completedLog.pop();
       }
+      updateTimerDisplay();
     }
 
     function finishWorkout() {
       clearInterval(timerInterval);
+      // Resume from any paused state so elapsed calc is correct
+      if (isPaused && pauseStartedAt) {
+        totalPausedMs += Date.now() - pauseStartedAt;
+        pauseStartedAt = null;
+        isPaused = false;
+      }
       workoutCompletedAt = new Date();
       document.getElementById('workoutScreen').classList.add('hidden');
       document.getElementById('doneScreen').classList.remove('hidden');
@@ -1066,6 +1229,13 @@
       localStorage.setItem('stravaClientSecret', clientSecret);
       // Save pending send so we know to send after callback
       localStorage.setItem('stravaPendingSend', '1');
+      // Persist workout state so it survives the OAuth redirect
+      localStorage.setItem('stravaPendingWorkout', JSON.stringify({
+        startedAt: workoutStartedAt ? workoutStartedAt.toISOString() : null,
+        completedAt: workoutCompletedAt ? workoutCompletedAt.toISOString() : null,
+        pausedMs: totalPausedMs,
+        log: completedLog
+      }));
 
       const url = `${STRAVA_AUTH_URL}?client_id=${encodeURIComponent(clientId)}&response_type=code&redirect_uri=${encodeURIComponent(getRedirectUri())}&approval_prompt=auto&scope=activity:write`;
       window.location.href = url;
@@ -1135,9 +1305,11 @@
     }
 
     async function postActivity(accessToken) {
-      const start = workoutCompletedAt
-        ? new Date(workoutCompletedAt.getTime() - 10 * 60 * 1000)
-        : new Date(Date.now() - 10 * 60 * 1000);
+      const elapsed = getElapsedSeconds() || 600;
+      const start = workoutStartedAt
+        ? new Date(workoutStartedAt.getTime())
+        : new Date(Date.now() - elapsed * 1000);
+      const description = buildStravaDescription();
 
       const r = await fetch(STRAVA_ACTIVITY_URL, {
         method: 'POST',
@@ -1149,7 +1321,8 @@
           name: 'Morgenyoga',
           sport_type: 'Yoga',
           start_date_local: formatLocalISO(start),
-          elapsed_time: 600
+          elapsed_time: elapsed,
+          description: description
         })
       });
       const data = await r.json();
@@ -1208,12 +1381,22 @@
         await exchangeCodeForToken(code);
         localStorage.removeItem('stravaPendingSend');
         if (pendingSend) {
+          // Restore workout state saved before the OAuth redirect
+          const saved = localStorage.getItem('stravaPendingWorkout');
+          if (saved) {
+            try {
+              const data = JSON.parse(saved);
+              workoutStartedAt = data.startedAt ? new Date(data.startedAt) : new Date(Date.now() - 600000);
+              workoutCompletedAt = data.completedAt ? new Date(data.completedAt) : new Date();
+              totalPausedMs = data.pausedMs || 0;
+              completedLog = data.log || [];
+            } catch (e) {}
+            localStorage.removeItem('stravaPendingWorkout');
+          }
           // Show done screen and trigger send
           document.getElementById('startScreen').classList.add('hidden');
           document.getElementById('workoutScreen').classList.add('hidden');
           document.getElementById('doneScreen').classList.remove('hidden');
-          // Don't have actual completion time, but we just sent it
-          workoutCompletedAt = workoutCompletedAt || new Date();
           await sendToStrava();
         } else {
           alert('Strava er forbundet. Du kan nu sende aktiviteter.');
@@ -1221,6 +1404,7 @@
       } catch (e) {
         alert(`Strava-fejl: ${e.message}`);
         localStorage.removeItem('stravaPendingSend');
+        localStorage.removeItem('stravaPendingWorkout');
       }
     }
 

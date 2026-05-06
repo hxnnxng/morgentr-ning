@@ -18,6 +18,7 @@
       --green: #34d399;
       --orange: #fb923c;
       --red: #f87171;
+      --strava: #fc4c02;
       --text: #e4e4e7;
       --muted: #71717a;
       --border: #27272a;
@@ -39,7 +40,7 @@
 
     header {
       text-align: center;
-      padding: 2rem 1rem 1rem;
+      padding: 1.5rem 1rem 0.75rem;
       width: 100%;
       max-width: 800px;
     }
@@ -64,7 +65,7 @@
       width: 100%;
       max-width: 800px;
       padding: 0 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
 
     .progress-steps {
@@ -94,6 +95,7 @@
       max-width: 800px;
       padding: 0 1rem;
       margin-bottom: 0.5rem;
+      text-align: center;
     }
 
     .section-label span {
@@ -104,41 +106,119 @@
       font-weight: 600;
     }
 
-    /* Main card */
-    .exercise-card {
-      width: 100%;
-      max-width: 800px;
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      margin: 0 1rem;
-      overflow: hidden;
-    }
-
+    /* Workout layout */
     #workoutScreen {
       width: 100%;
+      max-width: 800px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 0 1rem 2rem;
     }
 
-    .video-container {
+    /* BIG TIMER */
+    .big-timer {
       position: relative;
-      width: 100%;
-      padding-bottom: 56.25%;
-      background: #000;
+      width: 280px;
+      height: 280px;
+      margin: 1.5rem auto 1rem;
     }
 
-    .video-container iframe {
-      position: absolute;
-      top: 0; left: 0;
+    .big-timer-circle {
       width: 100%;
       height: 100%;
-      border: 0;
+      transform: rotate(-90deg);
     }
 
-    .exercise-info {
-      padding: 1.25rem 1.5rem;
+    .big-timer-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 6;
+    }
+
+    .big-timer-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s linear, stroke 0.3s;
+      filter: drop-shadow(0 0 12px var(--accent-glow));
+    }
+
+    .big-timer-progress.warning { stroke: var(--orange); filter: drop-shadow(0 0 12px rgba(251, 146, 60, 0.4)); }
+    .big-timer-progress.danger { stroke: var(--red); filter: drop-shadow(0 0 12px rgba(248, 113, 113, 0.5)); animation: timer-pulse 0.5s infinite; }
+    .big-timer-progress.rest { stroke: var(--green); filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.4)); }
+
+    @keyframes timer-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .big-timer-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 100%;
+    }
+
+    .big-timer-seconds {
+      font-size: 5.5rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .big-timer-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .big-timer-label.rest-label { color: var(--green); }
+
+    /* Exercise name as link */
+    .exercise-name-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      transition: background 0.2s;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .exercise-name-link:hover {
+      background: var(--card);
+    }
+
+    .exercise-name-link .play-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--red);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .video-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: -0.25rem;
     }
 
     .exercise-number {
@@ -147,115 +227,61 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-top: 0.75rem;
     }
 
-    .exercise-name {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin: 0.25rem 0 0.75rem;
+    /* Instructions block */
+    .exercise-info-block {
+      width: 100%;
+      max-width: 600px;
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      margin-top: 1.25rem;
     }
 
     .exercise-detail {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
+
+    .exercise-detail:last-child { margin-bottom: 0; }
 
     .exercise-detail strong {
       color: var(--accent);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 0.25rem;
     }
 
     .exercise-detail p {
-      color: var(--muted);
-      font-size: 0.9rem;
+      color: var(--text);
+      font-size: 0.95rem;
       line-height: 1.5;
-      margin-top: 0.15rem;
     }
 
     .exercise-tip {
       background: rgba(251, 146, 60, 0.1);
       border-left: 3px solid var(--orange);
-      padding: 0.5rem 0.75rem;
+      padding: 0.6rem 0.85rem;
       border-radius: 0 8px 8px 0;
       margin-top: 0.75rem;
     }
 
     .exercise-tip p {
       color: var(--orange);
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       line-height: 1.4;
     }
 
-    /* Timer section */
-    .timer-section {
-      width: 100%;
-      max-width: 800px;
-      padding: 1.25rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .timer-display {
-      position: relative;
-      width: 120px;
-      height: 120px;
-    }
-
-    .timer-circle {
-      width: 120px;
-      height: 120px;
-      transform: rotate(-90deg);
-    }
-
-    .timer-bg {
-      fill: none;
-      stroke: var(--border);
-      stroke-width: 4;
-    }
-
-    .timer-progress {
-      fill: none;
-      stroke: var(--accent);
-      stroke-width: 4;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 0.5s linear, stroke 0.3s;
-    }
-
-    .timer-progress.warning { stroke: var(--orange); }
-    .timer-progress.danger { stroke: var(--red); }
-    .timer-progress.rest { stroke: var(--green); }
-
-    .timer-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .timer-seconds {
-      font-size: 2rem;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .timer-label {
-      font-size: 0.65rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .timer-label.rest-label { color: var(--green); }
-
     /* Controls */
-    .controls {
+    .controls-section {
       display: flex;
       gap: 0.75rem;
       align-items: center;
+      margin-top: 1.5rem;
     }
 
     .btn {
@@ -268,11 +294,12 @@
     }
 
     .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .btn-primary {
       background: var(--accent);
       color: #fff;
-      padding: 0.75rem 2rem;
+      padding: 0.85rem 2.5rem;
       font-size: 1rem;
     }
 
@@ -281,8 +308,8 @@
     .btn-secondary {
       background: var(--border);
       color: var(--text);
-      padding: 0.6rem 1.25rem;
-      font-size: 0.875rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.9rem;
     }
 
     .btn-secondary:hover { background: #333; }
@@ -290,8 +317,8 @@
     .btn-icon {
       background: var(--border);
       color: var(--text);
-      width: 44px;
-      height: 44px;
+      width: 52px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -301,12 +328,25 @@
 
     .btn-icon:hover { background: #333; }
 
+    .btn-strava {
+      background: var(--strava);
+      color: #fff;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .btn-strava:hover { background: #e04400; }
+    .btn-strava:disabled:hover { background: var(--strava); }
+
     /* Start screen */
     .start-screen {
       width: 100%;
       max-width: 800px;
       text-align: center;
-      padding: 3rem 1.5rem;
+      padding: 2rem 1.5rem;
     }
 
     .start-screen h2 {
@@ -337,14 +377,6 @@
       max-width: 500px;
     }
 
-    .exercise-list-preview h3 {
-      font-size: 0.8rem;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
-    }
-
     .exercise-list-preview .part-label {
       font-size: 0.7rem;
       color: var(--muted);
@@ -354,8 +386,9 @@
       margin-bottom: 0.25rem;
     }
 
+    .exercise-list-preview ul { list-style: none; padding: 0; }
+
     .exercise-list-preview li {
-      list-style: none;
       padding: 0.4rem 0;
       font-size: 0.9rem;
       color: var(--text);
@@ -374,7 +407,7 @@
       width: 100%;
       max-width: 800px;
       text-align: center;
-      padding: 4rem 1.5rem;
+      padding: 3rem 1.5rem;
     }
 
     .done-screen h2 {
@@ -388,193 +421,198 @@
       line-height: 1.6;
     }
 
-    .done-screen .btn-primary {
+    .done-actions {
       margin-top: 2rem;
-      background: var(--green);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
     }
 
-    .done-screen .btn-primary:hover { background: #2bc48a; }
+    .strava-status {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      min-height: 1.5em;
+      color: var(--muted);
+    }
+
+    .strava-status.success { color: var(--green); }
+    .strava-status.error { color: var(--red); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      max-width: 480px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-content .modal-desc {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-content .modal-desc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .modal-content .modal-desc a:hover { text-decoration: underline; }
+
+    .modal-content label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0.85rem 0 0.3rem;
+      font-weight: 600;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .modal-content input:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      justify-content: flex-end;
+    }
+
+    .modal-help {
+      background: rgba(79, 140, 255, 0.08);
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .modal-help ol { margin-left: 1.25rem; margin-top: 0.4rem; }
+    .modal-help li { margin: 0.2rem 0; }
+    .modal-help code { background: rgba(255,255,255,0.08); padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.85em; word-break: break-all; }
 
     .hidden { display: none !important; }
-
-    /* Breathing reminder */
-    .breathing {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 0.25rem;
-    }
 
     /* ===== MOBILE: up to 640px ===== */
     @media (max-width: 640px) {
       header {
-        padding: 1.25rem 1rem 0.5rem;
+        padding: 1rem 1rem 0.5rem;
       }
 
-      header h1 { font-size: 1.2rem; }
+      header h1 { font-size: 1.15rem; }
       header p { font-size: 0.8rem; }
 
-      /* Start screen */
-      .start-screen {
-        padding: 2rem 1rem;
-      }
-
+      .start-screen { padding: 1.5rem 1rem; }
       .start-screen h2 { font-size: 1.5rem; }
+      .start-screen .btn-primary { width: 100%; padding: 1rem; font-size: 1.1rem; }
 
-      .start-screen .btn-primary {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.1rem;
+      .big-timer {
+        width: 240px;
+        height: 240px;
+        margin: 1rem auto 0.75rem;
       }
 
-      .exercise-list-preview {
-        margin: 1rem auto;
-      }
+      .big-timer-seconds { font-size: 4.5rem; }
+      .big-timer-label { font-size: 0.75rem; }
 
-      /* Workout screen: card goes edge-to-edge */
-      .exercise-card {
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        margin: 0;
-      }
-
-      .exercise-info {
-        padding: 0.75rem 1rem;
-      }
-
-      .exercise-name {
+      .exercise-name-link {
         font-size: 1.15rem;
-        margin: 0.15rem 0 0.5rem;
+        padding: 0.4rem 0.75rem;
       }
 
-      .exercise-number { font-size: 0.7rem; }
-
-      .exercise-detail strong { font-size: 0.75rem; }
-      .exercise-detail p { font-size: 0.85rem; }
-
-      .section-label {
-        padding: 0 1rem;
-        margin-bottom: 0.25rem;
+      .exercise-info-block {
+        padding: 1rem 1.1rem;
+        margin-top: 1rem;
       }
 
-      .progress-container {
-        margin-bottom: 0.5rem;
+      .exercise-detail p { font-size: 0.9rem; }
+
+      .controls-section {
+        margin-top: 1rem;
+        gap: 0.6rem;
       }
 
-      /* Sticky timer bar at bottom on mobile */
-      .timer-section {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--card);
-        border-top: 1px solid var(--border);
-        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0));
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.75rem;
-        z-index: 100;
-      }
+      .btn-primary { padding: 0.75rem 2rem; font-size: 0.95rem; }
+      .btn-icon { width: 48px; height: 48px; }
 
-      .timer-display {
-        width: 64px;
-        height: 64px;
-        flex-shrink: 0;
-      }
-
-      .timer-circle {
-        width: 64px;
-        height: 64px;
-      }
-
-      .timer-seconds { font-size: 1.3rem; }
-      .timer-label { font-size: 0.55rem; }
-
-      .breathing { display: none; }
-
-      .controls {
-        gap: 0.5rem;
-      }
-
-      .btn-primary {
-        padding: 0.65rem 1.5rem;
-        font-size: 0.9rem;
-      }
-
-      .btn-icon {
-        width: 48px;
-        height: 48px;
-        font-size: 1.1rem;
-      }
-
-      /* Extra bottom padding so content isn't hidden behind sticky bar */
-      #workoutScreen {
-        padding-bottom: 100px;
-      }
-
-      /* Done screen */
-      .done-screen {
-        padding: 3rem 1.5rem;
-      }
-
+      .done-screen { padding: 2.5rem 1.5rem; }
       .done-screen h2 { font-size: 1.5rem; }
-
-      .done-screen .btn-primary {
-        width: 100%;
-        padding: 1rem;
-      }
+      .done-actions { width: 100%; }
+      .done-actions .btn { width: 100%; }
     }
 
     /* ===== VERY SMALL: up to 360px ===== */
     @media (max-width: 360px) {
       header h1 { font-size: 1.05rem; }
 
-      .start-screen h2 { font-size: 1.3rem; }
-
-      .exercise-name { font-size: 1rem; }
-
-      .exercise-detail p { font-size: 0.8rem; }
-
-      .timer-display {
-        width: 56px;
-        height: 56px;
+      .big-timer {
+        width: 200px;
+        height: 200px;
       }
 
-      .timer-circle {
-        width: 56px;
-        height: 56px;
-      }
-
-      .timer-seconds { font-size: 1.1rem; }
-
-      .btn-primary {
-        padding: 0.6rem 1rem;
-        font-size: 0.85rem;
-      }
-
-      .btn-icon {
-        width: 42px;
-        height: 42px;
-      }
+      .big-timer-seconds { font-size: 3.5rem; }
+      .exercise-name-link { font-size: 1rem; }
     }
 
     /* ===== LANDSCAPE MOBILE ===== */
     @media (max-height: 500px) and (orientation: landscape) {
-      header { padding: 0.5rem 1rem 0.25rem; }
-      header h1 { font-size: 1rem; }
+      header { padding: 0.4rem 1rem 0.2rem; }
+      header h1 { font-size: 0.95rem; }
       header p { display: none; }
 
-      .video-container {
-        padding-bottom: 40%;
+      #workoutScreen {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: flex-start;
       }
 
-      .exercise-info { padding: 0.5rem 1rem; }
-      .exercise-detail { margin-bottom: 0.25rem; }
-
-      .timer-section {
-        padding: 0.5rem 1rem;
+      .big-timer {
+        width: 160px;
+        height: 160px;
+        margin: 0;
       }
+
+      .big-timer-seconds { font-size: 3rem; }
+
+      .exercise-info-block { margin-top: 0; flex: 1; min-width: 280px; }
     }
   </style>
 </head>
@@ -590,6 +628,7 @@
     <h2>God morgen!</h2>
     <p>Denne rutine løsner dit SI-led, vækker din core og fjerner morgenstivheden — uden at belaste din lyske.</p>
     <p style="font-size:0.8rem;">10 øvelser &middot; 45 sek. pr. øvelse &middot; 15 sek. pause</p>
+    <p style="font-size:0.8rem; color: var(--muted);">Tryk på øvelsens navn for at se en YouTube-video.</p>
 
     <div class="exercise-list-preview">
       <p class="part-label">Del 1 — Mobilisering af SI-led og bækken</p>
@@ -623,46 +662,43 @@
       <span id="sectionLabel"></span>
     </div>
 
-    <div class="exercise-card">
-      <div class="video-container">
-        <iframe id="videoPlayer" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      </div>
-      <div class="exercise-info">
-        <div class="exercise-number" id="exerciseNumber"></div>
-        <div class="exercise-name" id="exerciseName"></div>
-        <div class="exercise-detail">
-          <strong>Udførsel</strong>
-          <p id="exerciseHow"></p>
-        </div>
-        <div class="exercise-detail">
-          <strong>Hvorfor</strong>
-          <p id="exerciseWhy"></p>
-        </div>
-        <div class="exercise-tip hidden" id="exerciseTipBox">
-          <p id="exerciseTip"></p>
-        </div>
+    <div class="big-timer">
+      <svg class="big-timer-circle" viewBox="0 0 200 200">
+        <circle class="big-timer-bg" cx="100" cy="100" r="92" />
+        <circle class="big-timer-progress" id="timerProgress" cx="100" cy="100" r="92"
+          stroke-dasharray="578.05" stroke-dashoffset="0" />
+      </svg>
+      <div class="big-timer-text">
+        <div class="big-timer-seconds" id="timerSeconds">45</div>
+        <div class="big-timer-label" id="timerLabel">Øvelse</div>
       </div>
     </div>
 
-    <div class="timer-section">
-      <div class="timer-display">
-        <svg class="timer-circle" viewBox="0 0 120 120">
-          <circle class="timer-bg" cx="60" cy="60" r="54" />
-          <circle class="timer-progress" id="timerProgress" cx="60" cy="60" r="54"
-            stroke-dasharray="339.29" stroke-dashoffset="0" />
-        </svg>
-        <div class="timer-text">
-          <div class="timer-seconds" id="timerSeconds">45</div>
-          <div class="timer-label" id="timerLabel">Øvelse</div>
-        </div>
-      </div>
-      <p class="breathing" id="breathingText">Træk vejret dybt ned i maven</p>
+    <a id="exerciseNameLink" class="exercise-name-link" target="_blank" rel="noopener">
+      <span class="play-icon">▶</span>
+      <span id="exerciseName"></span>
+    </a>
+    <div class="video-hint">Tryk for at se video på YouTube</div>
+    <div class="exercise-number" id="exerciseNumber"></div>
 
-      <div class="controls">
-        <button class="btn btn-icon" id="btnPrev" onclick="prevExercise()" title="Forrige">&#9664;</button>
-        <button class="btn btn-primary" id="btnPause" onclick="togglePause()">Pause</button>
-        <button class="btn btn-icon" id="btnSkip" onclick="skipExercise()" title="Spring over">&#9654;</button>
+    <div class="exercise-info-block">
+      <div class="exercise-detail">
+        <strong>Udførsel</strong>
+        <p id="exerciseHow"></p>
       </div>
+      <div class="exercise-detail">
+        <strong>Hvorfor</strong>
+        <p id="exerciseWhy"></p>
+      </div>
+      <div class="exercise-tip hidden" id="exerciseTipBox">
+        <p id="exerciseTip"></p>
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <button class="btn btn-icon" id="btnPrev" onclick="prevExercise()" title="Forrige">&#9664;</button>
+      <button class="btn btn-primary" id="btnPause" onclick="togglePause()">Pause</button>
+      <button class="btn btn-icon" id="btnSkip" onclick="skipExercise()" title="Spring over">&#9654;</button>
     </div>
   </div>
 
@@ -671,15 +707,52 @@
     <h2>Godt klaret!</h2>
     <p>Du har gennemført din morgenrutine.</p>
     <p style="font-size:0.85rem; margin-top:0.5rem;">Husk: Kontinuitet slår intensitet.<br>Gør dette hver dag i 14 dage og mærk forskellen.</p>
-    <button class="btn btn-primary" onclick="resetWorkout()">Start forfra</button>
+
+    <div class="done-actions">
+      <button class="btn btn-strava" id="btnStrava" onclick="sendToStrava()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+        Send til Strava
+      </button>
+      <button class="btn btn-secondary" onclick="resetWorkout()">Start forfra</button>
+    </div>
+
+    <div id="stravaStatus" class="strava-status"></div>
   </div>
 
-  <!-- AUDIO (beep) -->
+  <!-- STRAVA SETTINGS MODAL -->
+  <div id="stravaModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3>Forbind med Strava</h3>
+      <p class="modal-desc">Første gang skal du oprette en Strava API-app for at appen kan sende aktiviteter.</p>
+
+      <div class="modal-help">
+        <strong>Sådan gør du:</strong>
+        <ol>
+          <li>Gå til <a href="https://www.strava.com/settings/api" target="_blank">strava.com/settings/api</a></li>
+          <li>Opret en app (giv den et navn, fx "Morgenyoga")</li>
+          <li>Sæt <strong>Authorization Callback Domain</strong> til <code id="callbackDomain">localhost</code></li>
+          <li>Kopiér <strong>Client ID</strong> og <strong>Client Secret</strong> herunder</li>
+          <li>Klik "Forbind med Strava" — du bliver sendt til Strava for at give tilladelse</li>
+        </ol>
+      </div>
+
+      <label for="stravaClientId">Client ID</label>
+      <input type="text" id="stravaClientId" placeholder="fx 123456" autocomplete="off">
+
+      <label for="stravaClientSecret">Client Secret</label>
+      <input type="password" id="stravaClientSecret" placeholder="32 tegn" autocomplete="off">
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeStravaModal()">Annuller</button>
+        <button class="btn btn-strava" onclick="authorizeStrava()">Forbind med Strava</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const EXERCISE_TIME = 45;
     const REST_TIME = 15;
-    const CIRCUMFERENCE = 2 * Math.PI * 54; // ~339.29
+    const CIRCUMFERENCE = 2 * Math.PI * 92; // ~578.05
 
     const exercises = [
       {
@@ -769,28 +842,38 @@
     let isResting = false;
     let isPaused = false;
     let timerInterval = null;
+    let workoutCompletedAt = null;
 
-    // Audio context for beeps
+    /* ============ AUDIO ============ */
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+      }
+      return audioCtx;
+    }
+
     function playBeep(freq = 660, duration = 150) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.frequency.value = freq;
-        gain.gain.value = 0.3;
+        gain.gain.value = 0.35;
         osc.start();
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration / 1000);
         osc.stop(ctx.currentTime + duration / 1000);
       } catch (e) {}
     }
 
-    function playDoubleBeep() {
-      playBeep(880, 120);
-      setTimeout(() => playBeep(880, 120), 180);
+    function playFinalBeep() {
+      playBeep(880, 250);
     }
 
+    /* ============ TIMER LOGIC ============ */
     function buildProgress() {
       const container = document.getElementById('progressSteps');
       container.innerHTML = '';
@@ -808,6 +891,7 @@
       document.getElementById('sectionLabel').textContent = ex.section;
       document.getElementById('exerciseNumber').textContent = `Øvelse ${currentExercise + 1} af ${exercises.length}`;
       document.getElementById('exerciseName').textContent = ex.name;
+      document.getElementById('exerciseNameLink').href = `https://www.youtube.com/watch?v=${ex.videoId}`;
       document.getElementById('exerciseHow').textContent = ex.how;
       document.getElementById('exerciseWhy').textContent = ex.why;
 
@@ -818,9 +902,6 @@
       } else {
         tipBox.classList.add('hidden');
       }
-
-      document.getElementById('videoPlayer').src =
-        `https://www.youtube.com/embed/${ex.videoId}?rel=0&modestbranding=1`;
 
       buildProgress();
     }
@@ -836,7 +917,7 @@
       progress.classList.remove('warning', 'danger', 'rest');
       if (isResting) {
         progress.classList.add('rest');
-      } else if (timeLeft <= 5) {
+      } else if (timeLeft <= 3) {
         progress.classList.add('danger');
       } else if (timeLeft <= 10) {
         progress.classList.add('warning');
@@ -845,10 +926,7 @@
       document.getElementById('timerSeconds').textContent = timeLeft;
       const label = document.getElementById('timerLabel');
       label.textContent = isResting ? 'Pause' : 'Øvelse';
-      label.className = 'timer-label' + (isResting ? ' rest-label' : '');
-
-      document.getElementById('breathingText').textContent =
-        isResting ? 'Gør dig klar til næste øvelse...' : 'Træk vejret dybt ned i maven';
+      label.className = 'big-timer-label' + (isResting ? ' rest-label' : '');
     }
 
     function tick() {
@@ -856,13 +934,16 @@
 
       timeLeft--;
 
-      if (timeLeft <= 3 && timeLeft > 0) playBeep(440, 80);
+      // Beep at 3, 2, 1
+      if (timeLeft >= 1 && timeLeft <= 3) {
+        playBeep(660, 100);
+      }
 
       if (timeLeft <= 0) {
-        playDoubleBeep();
+        // Beep at 0 (final / longer beep)
+        playFinalBeep();
 
         if (isResting) {
-          // Rest done, move to next exercise
           isResting = false;
           currentExercise++;
           if (currentExercise >= exercises.length) {
@@ -872,7 +953,6 @@
           timeLeft = EXERCISE_TIME;
           showExercise();
         } else {
-          // Exercise done, start rest (unless last exercise)
           if (currentExercise >= exercises.length - 1) {
             finishWorkout();
             return;
@@ -886,6 +966,10 @@
     }
 
     function startWorkout() {
+      // Resume audio context (must happen on user gesture)
+      const ctx = getAudioCtx();
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+
       document.getElementById('startScreen').classList.add('hidden');
       document.getElementById('workoutScreen').classList.remove('hidden');
       document.getElementById('doneScreen').classList.add('hidden');
@@ -910,15 +994,9 @@
       if (isResting) {
         isResting = false;
         currentExercise++;
-        if (currentExercise >= exercises.length) {
-          finishWorkout();
-          return;
-        }
+        if (currentExercise >= exercises.length) { finishWorkout(); return; }
       } else {
-        if (currentExercise >= exercises.length - 1) {
-          finishWorkout();
-          return;
-        }
+        if (currentExercise >= exercises.length - 1) { finishWorkout(); return; }
         isResting = true;
       }
 
@@ -943,14 +1021,211 @@
 
     function finishWorkout() {
       clearInterval(timerInterval);
+      workoutCompletedAt = new Date();
       document.getElementById('workoutScreen').classList.add('hidden');
       document.getElementById('doneScreen').classList.remove('hidden');
+      document.getElementById('stravaStatus').textContent = '';
+      document.getElementById('stravaStatus').className = 'strava-status';
+      document.getElementById('btnStrava').disabled = false;
     }
 
     function resetWorkout() {
       document.getElementById('doneScreen').classList.add('hidden');
       document.getElementById('startScreen').classList.remove('hidden');
     }
+
+    /* ============ STRAVA INTEGRATION ============ */
+    const STRAVA_AUTH_URL = 'https://www.strava.com/oauth/authorize';
+    const STRAVA_TOKEN_URL = 'https://www.strava.com/oauth/token';
+    const STRAVA_ACTIVITY_URL = 'https://www.strava.com/api/v3/activities';
+
+    function getRedirectUri() {
+      return window.location.origin + window.location.pathname;
+    }
+
+    function openStravaModal() {
+      const modal = document.getElementById('stravaModal');
+      document.getElementById('stravaClientId').value = localStorage.getItem('stravaClientId') || '';
+      document.getElementById('stravaClientSecret').value = localStorage.getItem('stravaClientSecret') || '';
+      document.getElementById('callbackDomain').textContent = window.location.hostname || 'localhost';
+      modal.classList.remove('hidden');
+    }
+
+    function closeStravaModal() {
+      document.getElementById('stravaModal').classList.add('hidden');
+    }
+
+    function authorizeStrava() {
+      const clientId = document.getElementById('stravaClientId').value.trim();
+      const clientSecret = document.getElementById('stravaClientSecret').value.trim();
+      if (!clientId || !clientSecret) {
+        alert('Indtast både Client ID og Client Secret.');
+        return;
+      }
+      localStorage.setItem('stravaClientId', clientId);
+      localStorage.setItem('stravaClientSecret', clientSecret);
+      // Save pending send so we know to send after callback
+      localStorage.setItem('stravaPendingSend', '1');
+
+      const url = `${STRAVA_AUTH_URL}?client_id=${encodeURIComponent(clientId)}&response_type=code&redirect_uri=${encodeURIComponent(getRedirectUri())}&approval_prompt=auto&scope=activity:write`;
+      window.location.href = url;
+    }
+
+    async function exchangeCodeForToken(code) {
+      const clientId = localStorage.getItem('stravaClientId');
+      const clientSecret = localStorage.getItem('stravaClientSecret');
+      if (!clientId || !clientSecret) return null;
+
+      const r = await fetch(STRAVA_TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code: code,
+          grant_type: 'authorization_code'
+        })
+      });
+      const data = await r.json();
+      if (data.refresh_token) {
+        localStorage.setItem('stravaRefreshToken', data.refresh_token);
+        localStorage.setItem('stravaAccessToken', data.access_token);
+        localStorage.setItem('stravaExpiresAt', String(data.expires_at));
+        return data.access_token;
+      }
+      throw new Error(data.message || 'OAuth-fejl');
+    }
+
+    async function getAccessToken() {
+      const expiresAt = parseInt(localStorage.getItem('stravaExpiresAt') || '0', 10);
+      const cached = localStorage.getItem('stravaAccessToken');
+      if (cached && expiresAt > Math.floor(Date.now() / 1000) + 60) {
+        return cached;
+      }
+
+      const clientId = localStorage.getItem('stravaClientId');
+      const clientSecret = localStorage.getItem('stravaClientSecret');
+      const refreshToken = localStorage.getItem('stravaRefreshToken');
+      if (!clientId || !clientSecret || !refreshToken) return null;
+
+      const r = await fetch(STRAVA_TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token'
+        })
+      });
+      const data = await r.json();
+      if (data.access_token) {
+        localStorage.setItem('stravaAccessToken', data.access_token);
+        localStorage.setItem('stravaExpiresAt', String(data.expires_at));
+        if (data.refresh_token) localStorage.setItem('stravaRefreshToken', data.refresh_token);
+        return data.access_token;
+      }
+      throw new Error(data.message || 'Kunne ikke forny token');
+    }
+
+    function formatLocalISO(date) {
+      // Strava expects: YYYY-MM-DDTHH:mm:ssZ in local time (no offset)
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}Z`;
+    }
+
+    async function postActivity(accessToken) {
+      const start = workoutCompletedAt
+        ? new Date(workoutCompletedAt.getTime() - 10 * 60 * 1000)
+        : new Date(Date.now() - 10 * 60 * 1000);
+
+      const r = await fetch(STRAVA_ACTIVITY_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Morgenyoga',
+          sport_type: 'Yoga',
+          start_date_local: formatLocalISO(start),
+          elapsed_time: 600
+        })
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.message || 'Strava afviste aktiviteten');
+      return data;
+    }
+
+    async function sendToStrava() {
+      const status = document.getElementById('stravaStatus');
+      const btn = document.getElementById('btnStrava');
+
+      // Need credentials?
+      if (!localStorage.getItem('stravaRefreshToken')) {
+        openStravaModal();
+        return;
+      }
+
+      btn.disabled = true;
+      status.className = 'strava-status';
+      status.textContent = 'Sender til Strava...';
+
+      try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) throw new Error('Mangler access token');
+        await postActivity(accessToken);
+        status.textContent = '✓ Aktivitet sendt til Strava!';
+        status.classList.add('success');
+      } catch (e) {
+        status.textContent = `Fejl: ${e.message}`;
+        status.classList.add('error');
+        btn.disabled = false;
+      }
+    }
+
+    /* ============ OAUTH CALLBACK ============ */
+    async function handleOAuthCallback() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error = params.get('error');
+
+      if (error) {
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        alert(`Strava-autorisation afvist: ${error}`);
+        localStorage.removeItem('stravaPendingSend');
+        return;
+      }
+
+      if (!code) return;
+
+      const pendingSend = localStorage.getItem('stravaPendingSend');
+      // Clean URL immediately
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      try {
+        await exchangeCodeForToken(code);
+        localStorage.removeItem('stravaPendingSend');
+        if (pendingSend) {
+          // Show done screen and trigger send
+          document.getElementById('startScreen').classList.add('hidden');
+          document.getElementById('workoutScreen').classList.add('hidden');
+          document.getElementById('doneScreen').classList.remove('hidden');
+          // Don't have actual completion time, but we just sent it
+          workoutCompletedAt = workoutCompletedAt || new Date();
+          await sendToStrava();
+        } else {
+          alert('Strava er forbundet. Du kan nu sende aktiviteter.');
+        }
+      } catch (e) {
+        alert(`Strava-fejl: ${e.message}`);
+        localStorage.removeItem('stravaPendingSend');
+      }
+    }
+
+    // Run on load
+    handleOAuthCallback();
   </script>
 </body>
 </html>
